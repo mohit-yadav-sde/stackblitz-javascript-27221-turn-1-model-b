@@ -4,20 +4,112 @@
     <title>Home</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <!--
-      Need a visual blank slate?
-      Remove all code in `styles.css`!
-    -->
-    <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+      #productivityWidget {
+          font-family: 'Arial', sans-serif;
+          width: 300px;
+          padding: 20px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+      #goalsList {
+          list-style: none;
+          padding: 0;
+      }
+      #goalsList li {
+          padding: 10px;
+          border-bottom: 1px solid #eee;
+          display: flex;
+          justify-content: space-between;
+      }
+      #progressBarContainer {
+          height: 20px;
+          background-color: #eee;
+          border-radius: 10px;
+          margin-top: 20px;
+          overflow: hidden;
+      }
+      #progressBar {
+          width: 0%;
+          height: 100%;
+          background-color: #5cb85c;
+          transition: width 0.3s;
+      }
+      #motivationalQuote {
+          margin-top: 20px;
+          font-style: italic;
+          text-align: center;
+          color: #666;
+      }
+      .high-priority {
+          color: red;
+      }
+      .medium-priority {
+          color: orange;
+      }
+      .low-priority {
+          color: green;
+      }
+  </style>
   </head>
   <body>
-    <nav>
-      <a href="/" aria-current="page">Home</a>
-      <a href="/page2.html">Other page</a>
-    </nav>
-    <main>
-      <h1>Home page</h1>
-    </main>
+    <div id="productivityWidget">
+      <h2>Set Your Daily Goals</h2>
+      <div id="goalsContainer">
+          <ul id="goalsList">
+              <!-- Goals will be listed here -->
+          </ul>
+          <button id="addGoal">Add Goal</button>
+      </div>
+      <div id="progressBarContainer">
+          <!-- Progress bar will be displayed here -->
+      </div>
+      <div id="motivationalQuote">
+          <!-- Motivational quote will be displayed here -->
+      </div>
+  </div>
+<script>
+    $(document).ready(function() {
+        $('#addGoal').on('click', function() {
+            var goalHtml = '<li><input type="text" placeholder="Enter your goal"><select><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select><button class="remove">X</button><input type="checkbox"></li>';
+            $('#goalsList').append(goalHtml);
+        });
+
+        $('#goalsList').on('click', '.remove', function() {
+            $(this).parent().remove();
+            updateProgress();
+        });
+
+        $('#goalsList').on('change', 'input[type="checkbox"]', function() {
+            updateProgress();
+        });
+
+        $('#goalsList').sortable({
+            axis: 'y',
+            containment: 'parent',
+            update: function() {
+                updateProgress();
+            }
+        });
+
+        function updateProgress() {
+            var totalGoals = $('#goalsList li').length;
+            var completedGoals = $('#goalsList li input:checked').length;
+            var progressPercentage = (completedGoals / totalGoals) * 100;
+            $('#progressBar').css('width', progressPercentage + '%');
+        }
+
+        // Fetch and display motivational quote
+        fetch('https://type.fit/api/quotes')
+        .then(response => response.json())
+        .then(data => {
+            const randomQuote = data[Math.floor(Math.random() * data.length)];
+            $('#motivationalQuote').text(`"${randomQuote.text}" - ${randomQuote.author}`);
+        });
+    });
+</script>
   </body>
 </html>
